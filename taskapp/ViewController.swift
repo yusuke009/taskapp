@@ -10,11 +10,13 @@ import UIKit
 import RealmSwift
 import UserNotifications
 
-class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource  {
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate  {
 
     
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var searchBar: UISearchBar!
     
+    var task = Task()
     let realm = try! Realm()
     
     var taskArray = try! Realm().objects(Task.self).sorted(byKeyPath: "date", ascending: true)
@@ -25,8 +27,32 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         tableView.delegate = self
         tableView.dataSource = self
+        searchBar.delegate = self
+        
+        searchBar.placeholder = "カテゴリーを入力してください"
         
     }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.endEditing(true)
+        
+        let result = realm.objects(Task.self).filter("category == %@", searchBar.text)
+        
+        if searchBar.text == "" {
+            taskArray = realm.objects(Task.self)
+        } else {
+            taskArray = result
+        }
+    
+          tableView.reloadData()
+                
+            }
+        
+        
+      
+        
+        
+    
 
     func tableView (_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return taskArray.count
@@ -44,6 +70,10 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         let dateString = formatter.string(from: task.date)
         cell.detailTextLabel?.text = dateString
+        
+        
+        
+        
         
         return cell
         
